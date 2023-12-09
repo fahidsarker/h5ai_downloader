@@ -5,6 +5,7 @@
 
 The crawler will search (including sib dir) to find the downloadable URLs and confirm before starting to download.
 Features:
+- Download any files from the websiite
 - Depth of recursion Control
 - Url caching
 - Download status tracking
