@@ -53,8 +53,8 @@ def get_target_domain(url):
         return match.group(1)
     return None
 
-def crawl_h5ai(target_domain, url, recursion):
-    if recursion > 4:
+def crawl_h5ai(target_domain, url, recursion, max_depth):
+    if recursion > max_depth:
         return
     print('Crawling: {}'.format(url))
     html = get_source_using_curl(url)
@@ -67,7 +67,7 @@ def crawl_h5ai(target_domain, url, recursion):
             continue
         if href.endswith('/'):
             url = target_domain + href
-            crawl_h5ai(target_domain, url, recursion+1)
+            crawl_h5ai(target_domain, url, recursion+1, max_depth)
         else:
             # print('Downloading: {}'.format(href))
             url = target_domain + href
@@ -103,27 +103,29 @@ if __name__ == '__main__':
     if len(sys.argv) > 1:
         url = sys.argv[1]
     else:
-        print('Usage: python dl.py <url>')
-        sys.exit(1)
-    
-    target_download_domain = get_target_domain(url)
-    if target_download_domain is None:
-        print('Invalid URL. Please enter with http:// or https://')
+        print('>>>> Usage: python dl.py <url>')
         sys.exit(1)
 
-    print('Target Domain Found: {}'.format(target_download_domain))
+    max_depth = sys.argv[2] if len(sys.argv) > 2 else 4    
+
+    target_download_domain = get_target_domain(url)
+    if target_download_domain is None:
+        print('>>> Invalid URL. Please enter with http:// or https://')
+        sys.exit(1)
+
+    print('>>>> Target Domain Found: {}'.format(target_download_domain))
     
-    crawl_h5ai(target_download_domain, url, 0)
+    crawl_h5ai(target_download_domain, url, 0, max_depth)
     
     if (len(downloadable_urls) == 0):
-        print("No Downloadbale files Found")
+        print(">>>> No Downloadbale files Found")
         sys.exit(1)
     print()
     print(">>>> Total Downloadable Files: {}".format(len(downloadable_urls)))
     print()
     continue_download = input('Press y to continue: ')
     if (continue_download != 'y'):
-        print('Aborting...')
+        print('>>>> Aborting...')
         sys.exit(1)
     load_downloaded_urls(url)
     download_urls(target_download_domain, url, downloadable_urls)
