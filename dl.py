@@ -96,6 +96,26 @@ def download_urls(target_domain, major_url, urls):
         import subprocess
         subprocess.call(['wget', url, '-O', path])  
         download_complete(major_url, url)
+        
+
+def get_urls(path, default_depth):
+    # is path is to a txt file, read the urls from the file
+    if path.endswith('.txt'):
+        if not os.path.exists(path):
+            print('>>>> File not found: {}'.format(path))
+            sys.exit(1)
+        with open(path, 'r') as f:
+            lines = f.read().splitlines()
+            segments = []
+            for line in lines:
+                splitted = line.split(' ')
+                if len(splitted) > 1:
+                    segments.append((splitted[0], int(splitted[1])))
+                else:
+                    segments.append((splitted[0], default_depth))
+            return segments
+    
+    return [(path, default_depth)]
 
 if __name__ == '__main__':
     
@@ -107,25 +127,42 @@ if __name__ == '__main__':
         sys.exit(1)
 
     max_depth = sys.argv[2] if len(sys.argv) > 2 else 4    
-
-    target_download_domain = get_target_domain(url)
-    if target_download_domain is None:
-        print('>>> Invalid URL. Please enter with http:// or https://')
-        sys.exit(1)
-
-    print('>>>> Target Domain Found: {}'.format(target_download_domain))
     
-    crawl_h5ai(target_download_domain, url, 0, max_depth)
-    
-    if (len(downloadable_urls) == 0):
-        print(">>>> No Downloadbale files Found")
+    to_work_urls = get_urls(url, max_depth)
+    if (len(to_work_urls) < 1):
+        print("No URL Detected")
         sys.exit(1)
-    print()
-    print(">>>> Total Downloadable Files: {}".format(len(downloadable_urls)))
-    print()
-    continue_download = input('Press y to continue: ')
-    if (continue_download != 'y'):
-        print('>>>> Aborting...')
-        sys.exit(1)
-    load_downloaded_urls(url)
-    download_urls(target_download_domain, url, downloadable_urls)
+    if (len(to_work_urls) > 1):
+        print("Detected {} URLs".format(len(to_work_urls)))
+        print("urls: ")
+        for url, max_depth in to_work_urls:
+            print(">>>> {} : depth: {}".format(url, max_depth))
+        print("\n\n\n\n------Processing----------------------------------- \n\n\n\n")        
+        
+
+    for url, max_depth in to_work_urls:
+        target_download_domain = get_target_domain(url)
+        if target_download_domain is None:
+            print('>>> Invalid URL. Please enter with http:// or https://')
+            sys.exit(1)
+
+        print('>>>> Target Domain Found: {}'.format(target_download_domain))
+        
+        crawl_h5ai(target_download_domain, url, 0, max_depth)
+        
+        if (len(downloadable_urls) == 0):
+            print(">>>> No Downloadbale files Found")
+            sys.exit(1)
+        print()
+        print(">>>> Total Downloadable Files: {}".format(len(downloadable_urls)))
+        print()
+        
+        # ask for confirmation only for single url download
+        if len(to_work_urls) < 2:
+            continue_download = input('Press y to continue: ')
+            if (continue_download != 'y'):
+                print('>>>> Aborting...')
+                sys.exit(1)
+                
+        load_downloaded_urls(url)
+        download_urls(target_download_domain, url, downloadable_urls)
