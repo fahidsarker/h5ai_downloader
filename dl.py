@@ -22,7 +22,7 @@ def get_source_using_curl(url):
             html = ''
         with open(file_path, 'wb') as f:
             pickle.dump(html, f)
-        return file_path
+        return html
         
 
 download_completed = []
