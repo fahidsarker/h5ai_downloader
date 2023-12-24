@@ -1,7 +1,8 @@
 # h5ai Downloader
 ## Download contents from a h5ai website with deep scraping and crawling
 ### Run -
-- `python dl.py <url> <max_depth default=4>`
+- install dependency `pip install -r requirements.txt`
+- `usage: python dl.py [-h] (-u URL | -f FILE) [-d DEPTH]`
 - url can be a h5ai directory url or a txt file which contains multiple urls
 - format of txt file:
 ```
